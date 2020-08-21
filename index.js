@@ -9,7 +9,6 @@ const config = {
   output: "./output",
 };
 
-const regex = RegExp(/(.*?.)(.html)/gm);
 const data = {
   /** [studentID]: {
    *  selectedSchoolYear: "XXXX - XXXX",
@@ -88,7 +87,14 @@ const pushNoDuplicate = (array, value) => {
   }
 };
 
+const resetMatchers = (arr) => {
+  arr.map((item) => {
+    item.lastIndex = 0;
+  });
+};
+
 const matchers = {
+  file: /(.*?)(.html)/m,
   selectedSchoolYear: /((<option selected="selected").*?>)(.*?)(<\/option>)/gm,
   selectedTerm: /("aspNetDisabled">)(.*?)(<\/)/gm,
   tableRow: /(<tr class="setHeight">)(.*?)(<\/tr>)/gm,
@@ -97,21 +103,25 @@ const matchers = {
 
 async function generateJSONSchedule(path) {
   const files = await fs.promises.readdir(path);
-  const filtered = files.filter((item) => regex.test(item));
+  const filtered = files.filter((item) => matchers.file.test(item));
   let currentDone = 0;
 
   filtered.map((file) => {
     const filePath = `${path}/${file}`;
     const studentID = file.split(".").shift();
     console.log(file, studentID);
-
     if (!data[studentID]) {
       data[studentID] = {};
     }
-
     const studentData = data[studentID];
 
     fs.readFile(filePath, "utf8", function (err, contents) {
+      resetMatchers([
+        matchers.selectedSchoolYear,
+        matchers.selectedTerm,
+        matchers.tableCell,
+        matchers.tableRow,
+      ]);
       if (err) {
         console.log("-----------------");
         console.log("Something happened with: ", filePath);
@@ -119,9 +129,16 @@ async function generateJSONSchedule(path) {
         console.log(err);
         console.log("-----------------");
       } else {
-        const selectedSchoolYear = matchers.selectedSchoolYear.exec(
-          contents
-        )[3];
+        let selectedSchoolYear = matchers.selectedSchoolYear.exec(contents);
+
+        if (!selectedSchoolYear) {
+          currentDone++;
+          console.log("Failed for: ", filePath);
+          return;
+        } else {
+          selectedSchoolYear = selectedSchoolYear[3];
+        }
+
         const selectedTerm = matchers.selectedTerm.exec(contents)[2];
 
         if (!studentData[selectedSchoolYear]) {
