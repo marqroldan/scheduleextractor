@@ -39,6 +39,8 @@ const data = {
    *            rooms: [],
    *            days: [],
    *            timeblocks: [],
+   *            dayTimeBlocks: [],
+   *            dayTimeRoomBlocks: [],
    *          }
    *        },
    *        subjectsTimeBlock: {
@@ -164,6 +166,8 @@ async function print(path) {
                   timeblock: currRow,
                   day: currCol % 7,
                 };
+                subjectObject.dayTimeBlock = `${subjectObject.day}-${subjectObject.timeblock}`;
+                subjectObject.dayTimeRoomBlock = `${subjectObject.day}-${subjectObject.timeblock}-${subjectObject.room}`;
               } else if (subjectObject.length == 2) {
                 subjectObject = subjectObject.join("");
               } else {
@@ -179,6 +183,12 @@ async function print(path) {
                     timeblocks: [subjectObject.timeblock],
                     days: [subjectObject.day],
                   };
+                  studentSubjects[subjectObject.courseCode].dayTimeBlocks = [
+                    subjectObject.dayTimeBlock,
+                  ];
+                  studentSubjects[
+                    subjectObject.courseCode
+                  ].dayTimeRoomBlocks = [subjectObject.dayTimeRoomBlock];
                 } else {
                   studentSubjects[subjectObject.courseCode].blocks++;
                   const subjectRooms =
@@ -197,6 +207,26 @@ async function print(path) {
                     studentSubjects[subjectObject.courseCode].days;
                   if (!subjectDays.includes(subjectObject.day)) {
                     subjectDays.push(subjectObject.day);
+                  }
+
+                  const subjectDayTimeBlocks =
+                    studentSubjects[subjectObject.courseCode].dayTimeBlocks;
+                  if (
+                    !subjectDayTimeBlocks.includes(subjectObject.dayTimeBlock)
+                  ) {
+                    subjectDayTimeBlocks.push(subjectObject.dayTimeBlock);
+                  }
+
+                  const subjectDayTimeRoomBlocks =
+                    studentSubjects[subjectObject.courseCode].dayTimeRoomBlocks;
+                  if (
+                    !subjectDayTimeRoomBlocks.includes(
+                      subjectObject.dayTimeRoomBlock
+                    )
+                  ) {
+                    subjectDayTimeRoomBlocks.push(
+                      subjectObject.dayTimeRoomBlock
+                    );
                   }
                 }
               }
