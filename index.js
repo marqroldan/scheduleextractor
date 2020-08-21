@@ -30,6 +30,13 @@ const data = {
    * } */
 };
 
+const matchers = {
+  selectedSchoolYear: /((<option selected="selected").*?>)(.*?)(<\/option>)/gm,
+  selectedTerm: /("aspNetDisabled">)(.*?)(<\/)/gm,
+  tableRow: /(<tr class="setHeight">)(.*?)(<\/tr>)/gm,
+  tableCell: /(?:<td(?:.*?)>(.*?)(?:<\/td>))/gm,
+};
+
 async function print(path) {
   const files = await fs.promises.readdir(path);
   const filtered = files.filter((item) => regex.test(item));
@@ -47,21 +54,34 @@ async function print(path) {
         console.log(err);
         console.log("-----------------");
       } else {
-        /*
-        const parsedData = parse(contents);
-        const selectedSchoolYear = parsedData.querySelector(
-          ".tableStyle1 tbody"
-        );
+        const selectedSchoolYear = matchers.selectedSchoolYear.exec(
+          contents
+        )[3];
+        const selectedTerm = matchers.selectedTerm.exec(contents)[2];
+        const regex = matchers.tableRow;
+        while ((m = regex.exec(contents)) !== null) {
+          // This is necessary to avoid infinite loops with zero-width matches
+          if (m.index === regex.lastIndex) {
+            regex.lastIndex++;
+          }
+          // The result can be accessed through the `m`-variable.
+          const targetMatch = m[2];
+          if (targetMatch) {
+            console.log("match", targetMatch);
+            console.log("===============!!!==============");
+            const regex2 = matchers.tableCell;
+            while ((cell = regex2.exec(targetMatch)) !== null) {
+              // This is necessary to avoid infinite loops with zero-width matches
+              if (cell.index === regex2.lastIndex) {
+                regex2.lastIndex++;
+              }
+              const cellValue = cell[1];
+              console.log("Cell Value", cellValue);
+            }
 
-        const a = selectedSchoolYear.childNodes[1].childNodes;
-        if (false) {
-          a.map((item) => {
-            console.log("ch", item.childNodes);
-          });
+            console.log("????????????????????????????????????");
+          }
         }
-
-        console.log("SelectedSchoolYear", selectedSchoolYear.childNodes[0]);
-        */
       }
     });
   });
