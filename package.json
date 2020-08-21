@@ -16,7 +16,5 @@
     "url": "https://github.com/marqroldan/scheduleextractor/issues"
   },
   "homepage": "https://github.com/marqroldan/scheduleextractor#readme",
-  "dependencies": {
-    "node-html-parser": "^1.2.20"
-  }
+  "dependencies": {}
 }
