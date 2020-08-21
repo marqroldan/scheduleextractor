@@ -28,6 +28,43 @@ const data = {
    *   }
    *  }
    * } */
+  //UPDATED VERSION ================================
+  /** [studentID]: {
+   *    [schoolYear]: {
+   *      [term]: {
+   *        subjects: {
+   *          [courseCode]: {
+   *            blocks: number,
+   *            section: string,
+   *            rooms: [],
+   *          }
+   *        },
+   *        subjectsTimeBlock: {
+   *         [timeBlock]: {
+   *            [day]: {
+   *                courseCode: '',
+   *                section: '',
+   *                room: '',
+   *            }
+   *         }
+   *        },
+   *        subjectsDay: {
+   *         [day]: {
+   *            [timeBlock]: {
+   *                courseCode: '',
+   *                section: '',
+   *                room: '',
+   *            }
+   *         }
+   *        }
+   *      }
+   *
+   *    }
+   *
+   *
+   *  selectedSchoolYear: "XXXX - XXXX",
+   *  selectedTerm: "TERM X",
+   * } */
 };
 
 const matchers = {
@@ -59,6 +96,7 @@ async function print(path) {
         )[3];
         const selectedTerm = matchers.selectedTerm.exec(contents)[2];
         const regex = matchers.tableRow;
+        let currCol = 0;
         while ((m = regex.exec(contents)) !== null) {
           // This is necessary to avoid infinite loops with zero-width matches
           if (m.index === regex.lastIndex) {
@@ -76,9 +114,21 @@ async function print(path) {
                 regex2.lastIndex++;
               }
               const cellValue = cell[1];
-              console.log("Cell Value", cellValue);
-            }
+              let subjectObject = (cellValue || "").split("<br>");
+              if (subjectObject.length == 3) {
+                subjectObject = {
+                  courseCode: subjectObject[0],
+                  section: subjectObject[1],
+                  room: subjectObject[2],
+                };
+              } else if (subjectObject.length == 2) {
+                subjectObject = subjectObject.join("");
+              } else {
+                subjectObject = {};
+              }
 
+              console.log("SubjectObject", subjectObject);
+            }
             console.log("????????????????????????????????????");
           }
         }
