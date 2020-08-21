@@ -4,6 +4,11 @@ const { error } = require("console");
 
 const startingDay = 1;
 
+const config = {
+  schedulesPath: "./files",
+  output: "./output",
+};
+
 const regex = RegExp(/(.*?.)(.html)/gm);
 const data = {
   /** [studentID]: {
@@ -43,31 +48,8 @@ const data = {
    *            dayTimeRoomBlocks: [],
    *          }
    *        },
-   *        subjectsTimeBlock: {
-   *         [timeBlock]: {
-   *            [day]: {
-   *                courseCode: '',
-   *                section: '',
-   *                room: '',
-   *            }
-   *         }
-   *        },
-   *        subjectsDay: {
-   *         [day]: {
-   *            [timeBlock]: {
-   *                courseCode: '',
-   *                section: '',
-   *                room: '',
-   *            }
-   *         }
-   *        }
    *      }
-   *
    *    }
-   *
-   *
-   *  selectedSchoolYear: "XXXX - XXXX",
-   *  selectedTerm: "TERM X",
    * } */
 };
 
@@ -86,6 +68,26 @@ const data = {
  *
  */
 
+const saveData = (data) => {
+  const sData = JSON.stringify(data);
+  // console.log("data", JSON.stringify(data));
+  /*
+  For some reason using date as file name fails
+  */
+  const fileName = "output"; // new Date().toISOString().replace(":", "");
+
+  fs.writeFile(`${config.output}/${fileName}.json`, sData, (err) => {
+    if (err) throw err;
+    console.log("The file has been saved!");
+  });
+};
+
+const pushNoDuplicate = (array, value) => {
+  if (!array.includes(value)) {
+    array.push(value);
+  }
+};
+
 const matchers = {
   selectedSchoolYear: /((<option selected="selected").*?>)(.*?)(<\/option>)/gm,
   selectedTerm: /("aspNetDisabled">)(.*?)(<\/)/gm,
@@ -93,7 +95,7 @@ const matchers = {
   tableCell: /(?:<td(?:.*?)>(.*?)(?:<\/td>))/gm,
 };
 
-async function print(path) {
+async function generateJSONSchedule(path) {
   const files = await fs.promises.readdir(path);
   const filtered = files.filter((item) => regex.test(item));
   let currentDone = 0;
@@ -191,43 +193,27 @@ async function print(path) {
                   ].dayTimeRoomBlocks = [subjectObject.dayTimeRoomBlock];
                 } else {
                   studentSubjects[subjectObject.courseCode].blocks++;
-                  const subjectRooms =
-                    studentSubjects[subjectObject.courseCode].rooms;
-                  if (!subjectRooms.includes(subjectObject.room)) {
-                    subjectRooms.push(subjectObject.room);
-                  }
 
-                  const subjectTimeBlocks =
-                    studentSubjects[subjectObject.courseCode].timeblocks;
-                  if (!subjectTimeBlocks.includes(subjectObject.timeblock)) {
-                    subjectTimeBlocks.push(subjectObject.timeblock);
-                  }
-
-                  const subjectDays =
-                    studentSubjects[subjectObject.courseCode].days;
-                  if (!subjectDays.includes(subjectObject.day)) {
-                    subjectDays.push(subjectObject.day);
-                  }
-
-                  const subjectDayTimeBlocks =
-                    studentSubjects[subjectObject.courseCode].dayTimeBlocks;
-                  if (
-                    !subjectDayTimeBlocks.includes(subjectObject.dayTimeBlock)
-                  ) {
-                    subjectDayTimeBlocks.push(subjectObject.dayTimeBlock);
-                  }
-
-                  const subjectDayTimeRoomBlocks =
-                    studentSubjects[subjectObject.courseCode].dayTimeRoomBlocks;
-                  if (
-                    !subjectDayTimeRoomBlocks.includes(
-                      subjectObject.dayTimeRoomBlock
-                    )
-                  ) {
-                    subjectDayTimeRoomBlocks.push(
-                      subjectObject.dayTimeRoomBlock
-                    );
-                  }
+                  pushNoDuplicate(
+                    studentSubjects[subjectObject.courseCode].rooms,
+                    subjectObject.room
+                  );
+                  pushNoDuplicate(
+                    studentSubjects[subjectObject.courseCode].timeblocks,
+                    subjectObject.timeblock
+                  );
+                  pushNoDuplicate(
+                    studentSubjects[subjectObject.courseCode].days,
+                    subjectObject.day
+                  );
+                  pushNoDuplicate(
+                    studentSubjects[subjectObject.courseCode].dayTimeBlocks,
+                    subjectObject.dayTimeBlock
+                  );
+                  pushNoDuplicate(
+                    studentSubjects[subjectObject.courseCode].dayTimeRoomBlocks,
+                    subjectObject.dayTimeRoomBlock
+                  );
                 }
               }
               //console.log("SubjectObject", subjectObject);
@@ -240,9 +226,10 @@ async function print(path) {
       }
       currentDone++;
       if (currentDone === filtered.length) {
-        console.log("IT is done", JSON.stringify(data));
+        saveData(data);
       }
     });
   });
 }
-print("./files").catch(console.error);
+
+generateJSONSchedule(config.schedulesPath).catch(console.error);
