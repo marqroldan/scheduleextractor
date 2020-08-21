@@ -77,11 +77,18 @@ const matchers = {
 async function print(path) {
   const files = await fs.promises.readdir(path);
   const filtered = files.filter((item) => regex.test(item));
+  let currentDone = 0;
 
   filtered.map((file) => {
     const filePath = `${path}/${file}`;
     const studentID = file.split(".").shift();
     console.log(file, studentID);
+
+    if (!data[studentID]) {
+      data[studentID] = {};
+    }
+
+    const studentData = data[studentID];
 
     fs.readFile(filePath, "utf8", function (err, contents) {
       if (err) {
@@ -95,6 +102,22 @@ async function print(path) {
           contents
         )[3];
         const selectedTerm = matchers.selectedTerm.exec(contents)[2];
+
+        if (!studentData[selectedSchoolYear]) {
+          studentData[selectedSchoolYear] = {};
+        }
+
+        if (!studentData[selectedSchoolYear][selectedTerm]) {
+          studentData[selectedSchoolYear][selectedTerm] = {};
+        }
+
+        if (!studentData[selectedSchoolYear][selectedTerm].subjects) {
+          studentData[selectedSchoolYear][selectedTerm]["subjects"] = {};
+        }
+
+        const studentSubjects =
+          studentData[selectedSchoolYear][selectedTerm]["subjects"];
+
         const regex = matchers.tableRow;
         let currCol = 0;
         while ((m = regex.exec(contents)) !== null) {
@@ -105,8 +128,8 @@ async function print(path) {
           // The result can be accessed through the `m`-variable.
           const targetMatch = m[2];
           if (targetMatch) {
-            console.log("match", targetMatch);
-            console.log("===============!!!==============");
+            // console.log("match", targetMatch);
+            // console.log("===============!!!==============");
             const regex2 = matchers.tableCell;
             while ((cell = regex2.exec(targetMatch)) !== null) {
               // This is necessary to avoid infinite loops with zero-width matches
@@ -127,11 +150,31 @@ async function print(path) {
                 subjectObject = {};
               }
 
-              console.log("SubjectObject", subjectObject);
+              if (subjectObject.courseCode) {
+                if (!studentSubjects[subjectObject.courseCode]) {
+                  studentSubjects[subjectObject.courseCode] = {
+                    blocks: 1,
+                    section: subjectObject.section,
+                    rooms: [subjectObject.room],
+                  };
+                } else {
+                  studentSubjects[subjectObject.courseCode].blocks++;
+                  const subjectRooms =
+                    studentSubjects[subjectObject.courseCode].rooms;
+                  if (!subjectRooms.includes(subjectObject.room)) {
+                    subjectRooms.push(subjectObject.room);
+                  }
+                }
+              }
+              //console.log("SubjectObject", subjectObject);
             }
-            console.log("????????????????????????????????????");
+            //console.log("????????????????????????????????????");
           }
         }
+      }
+      currentDone++;
+      if (currentDone === filtered.length) {
+        console.log("IT is done", JSON.stringify(data));
       }
     });
   });
