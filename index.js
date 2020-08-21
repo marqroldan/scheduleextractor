@@ -1,5 +1,8 @@
 const fs = require("fs");
+//const { parse } = require("node-html-parser");
 const { error } = require("console");
+
+const startingDay = 1;
 
 const regex = RegExp(/(.*?.)(.html)/gm);
 const data = {
@@ -44,6 +47,21 @@ async function print(path) {
         console.log(err);
         console.log("-----------------");
       } else {
+        /*
+        const parsedData = parse(contents);
+        const selectedSchoolYear = parsedData.querySelector(
+          ".tableStyle1 tbody"
+        );
+
+        const a = selectedSchoolYear.childNodes[1].childNodes;
+        if (false) {
+          a.map((item) => {
+            console.log("ch", item.childNodes);
+          });
+        }
+
+        console.log("SelectedSchoolYear", selectedSchoolYear.childNodes[0]);
+        */
       }
     });
   });
