@@ -1,0 +1,19 @@
+{
+  "name": "scheduleextractor",
+  "version": "0.0.1",
+  "description": "An extraction tool for the schedules of Mapua students\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[C automated extraction tool for the schedules of Mapua students",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/marqroldan/scheduleextractor.git"
+  },
+  "author": "Marq Roldan",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/marqroldan/scheduleextractor/issues"
+  },
+  "homepage": "https://github.com/marqroldan/scheduleextractor#readme"
+}
