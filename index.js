@@ -37,6 +37,8 @@ const data = {
    *            blocks: number,
    *            section: string,
    *            rooms: [],
+   *            days: [],
+   *            timeblocks: [],
    *          }
    *        },
    *        subjectsTimeBlock: {
@@ -66,6 +68,21 @@ const data = {
    *  selectedTerm: "TERM X",
    * } */
 };
+
+/**
+ *
+ * Time Blocks
+ * 0 - 7:30
+ * 1 - 9:00
+ * 2 - 10:30
+ * 3 - 12:00
+ * 4 - 1:30
+ * 5 - 3:00
+ * 6 - 4:30
+ * 7 - 6:00
+ * 8 - 7:30
+ *
+ */
 
 const matchers = {
   selectedSchoolYear: /((<option selected="selected").*?>)(.*?)(<\/option>)/gm,
@@ -118,8 +135,8 @@ async function print(path) {
         const studentSubjects =
           studentData[selectedSchoolYear][selectedTerm]["subjects"];
 
+        let currRow = 0;
         const regex = matchers.tableRow;
-        let currCol = 0;
         while ((m = regex.exec(contents)) !== null) {
           // This is necessary to avoid infinite loops with zero-width matches
           if (m.index === regex.lastIndex) {
@@ -127,10 +144,11 @@ async function print(path) {
           }
           // The result can be accessed through the `m`-variable.
           const targetMatch = m[2];
+          // console.log("match", targetMatch);
+          // console.log("===============!!!==============");
           if (targetMatch) {
-            // console.log("match", targetMatch);
-            // console.log("===============!!!==============");
             const regex2 = matchers.tableCell;
+            let currCol = 0;
             while ((cell = regex2.exec(targetMatch)) !== null) {
               // This is necessary to avoid infinite loops with zero-width matches
               if (cell.index === regex2.lastIndex) {
@@ -143,6 +161,8 @@ async function print(path) {
                   courseCode: subjectObject[0],
                   section: subjectObject[1],
                   room: subjectObject[2],
+                  timeblock: currRow,
+                  day: currCol % 7,
                 };
               } else if (subjectObject.length == 2) {
                 subjectObject = subjectObject.join("");
@@ -156,6 +176,8 @@ async function print(path) {
                     blocks: 1,
                     section: subjectObject.section,
                     rooms: [subjectObject.room],
+                    timeblocks: [subjectObject.timeblock],
+                    days: [subjectObject.day],
                   };
                 } else {
                   studentSubjects[subjectObject.courseCode].blocks++;
@@ -164,12 +186,26 @@ async function print(path) {
                   if (!subjectRooms.includes(subjectObject.room)) {
                     subjectRooms.push(subjectObject.room);
                   }
+
+                  const subjectTimeBlocks =
+                    studentSubjects[subjectObject.courseCode].timeblocks;
+                  if (!subjectTimeBlocks.includes(subjectObject.timeblock)) {
+                    subjectTimeBlocks.push(subjectObject.timeblock);
+                  }
+
+                  const subjectDays =
+                    studentSubjects[subjectObject.courseCode].days;
+                  if (!subjectDays.includes(subjectObject.day)) {
+                    subjectDays.push(subjectObject.day);
+                  }
                 }
               }
               //console.log("SubjectObject", subjectObject);
+              currCol++;
             }
             //console.log("????????????????????????????????????");
           }
+          currRow++;
         }
       }
       currentDone++;
